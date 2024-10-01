@@ -1,5 +1,11 @@
 Feedback from peer review:
 
-html file is generated in the 'src' folder rather than the doc folder where the pdf is generated.
+Directory structure:
+1. No html file
 
-Comments
+Tidyverse style:
+1. There are several places where you have missed the spaces around operators.
+2. Argument names need to be modified to be consistent across functions.
+
+Comments:
+1. Comments within functions are somewhat redundant with the code itself.
