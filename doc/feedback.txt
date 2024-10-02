@@ -1,4 +1,4 @@
-Feedback from peer review:
+Feedback:
 
 Directory structure:
 1. No html file
