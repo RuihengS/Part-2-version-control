@@ -12,7 +12,7 @@ knitr:
   opts_chunk: 
     fig.path: "../../results/figures/"
 editor: source
-date: 09-19-2024
+date: 10-02-2024
 author: Ruiheng Sun
 
 ---
@@ -34,11 +34,17 @@ respectively.  The table below presents the names and descriptions of
 the variables in each data set.
 
 <!-- Note the syntax to create a table in markdown -->
+
 <!-- Before the table there must be an empty line, and -->
+
 <!-- the table begins with a line of dashes. -->
+
 <!-- The column names are separated with spaces -->
+
 <!-- and the first character must be a space -->
+
 <!-- Then, segments of repeated dashes indicate the column separations (note -->
+
 <!-- the space between groups of dashes before the character D of the column Description) -->
 
 --------------------------------------------------------------------------------
@@ -61,14 +67,13 @@ the variables in each data set.
 --------------------------------------------------------------------------------
 
 Source: United Nations, Department of Economic and Social Affairs, 
-Population Division (2013). *World Population Prospects: The 2012 Revision, DVD Edition.*
+Population Division (2013). *World Population Prospects: The 2012 
+Revision, DVD Edition.*
 
-```{r message=FALSE, warning=FALSE}
+```{r, include = FALSE}
 # Load packages ----
 library(tidyverse)
-```
 
-```{r}
 # Read data from three data sets
 # I revised the directories since I created the new files.
 # I also changed the "SwedenData" into "sweden_data" for the same formats.
@@ -109,8 +114,6 @@ Then, store the results as a vector of length 2 (CBRs for two periods) for each 
   
 ### Answer 1
 
-First the study create the new variable `py`.
-
 ```{r}
 # Combine person-years for men and women into py for each dataset
 world_data$py <- world_data$py.men + world_data$py.women
@@ -120,10 +123,10 @@ sweden_data$py <- sweden_data$py.men + sweden_data$py.women
 
 
 <!-- Whenever you find that you will repeat the same calculation -->
-<!-- on different sets of data, **consider** creating a function -->
-<!-- instead of repeating the code for each piece of data. -->
 
-Then the study creates the new function for efficiency.
+<!-- on different sets of data, **consider** creating a function -->
+
+<!-- instead of repeating the code for each piece of data. -->
 
 ```{r}
 # Function to compute the Crude Birth Rate (CBR)
@@ -137,13 +140,14 @@ compute_cbr <- function(populationData) {
 ```
 
 <!-- The "pipe" `%>%` from package `magrittr` takes the output -->
+
 <!-- from the left hand side and makes it the first argument of -->
+
 <!-- the expression on the right hand side. -->
 
 <!-- Starting in R 4.1.0, there is a base pipe operator `|>` -->
-<!-- which has a similar behavior. -->
 
-Lastly, the study could use the function created before to calculate CBR.
+<!-- which has a similar behavior. -->
 
 ```{r}
 # Compute the CBR for each data set
@@ -152,7 +156,7 @@ Lastly, the study could use the function created before to calculate CBR.
 (sweden_cbr <- compute_cbr(sweden_data))
 ```
 
-The results indicate that Sweden has a higher CBR than Kenya.
+We could see The global crude birth rate has decreased during this period. Similarly, Sweden and Kenya show a downward trend, consistent with the global pattern, with Sweden maintaining a lower crude birth rate than Kenya throughout the entire period.
   
 ## Question 2
   
@@ -182,7 +186,7 @@ The CBR is easy to understand but contains both men and women
 
 ### Answer 2
 
-Similarly, the study creates function for ASFR.
+Similarly, we create function for ASFR.
 
 ```{r}
 # Function to compute Age specific fertility rate (ASFR)
@@ -192,22 +196,52 @@ compute_asfr <- function(pop_data) {
 }
 ```
 
-Then, the study computes ASFR for each data set.
-
 ```{r}
+# Compute ASFR for each data set
 world_data <- compute_asfr(world_data)
 kenya_data <- compute_asfr(kenya_data)
 sweden_data <- compute_asfr(sweden_data)
 ```
 
-Now we could see the differences between Kenya and Sweden's data on ASFR.
+We combine Kenya and Sweden's data on ASFR in the same diagram for comparison.
 
 ```{r}
-# Compare ASFRs for Kenya and Sweden
-kenya_data$asfr
-sweden_data$asfr
+# Now the two data sets are merged in one diagram based on the row
+# Two data sets have the exact same row
+kenya_sweden_compare <- rbind(kenya_data, sweden_data)
+
+# Convert the 'age' column into a factor with specified levels for ordered
+# categorical data
+kenya_sweden_compare$age <- factor(kenya_sweden_compare$age,
+  levels = c(
+    "0-4", "5-9", "10-14", "15-19",
+    "20-24", "25-29", "30-34", "35-39",
+    "40-44", "45-49", "50-54", "55-59",
+    "60-69", "70-79", "80+"
+  )
+)
+
+# Create a line plot to compare ASFRs between Kenya and Sweden
+kenya_sweden_ASFR <- kenya_sweden_compare %>%
+  ggplot(aes(x = age, y = asfr, group = country, color = country)) +
+  # Set aesthetics for Kenya and Sweden
+  geom_line() + # Use geom_line() to create lines for each country
+  labs(
+    title = "Age-Specific Fertility Rate Comparison",
+    x = "Age",
+    y = "ASFR",
+    color = "Country"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 55, vjust = 0.5)) +
+  facet_wrap(~period) # Create separate plots for each period to visualize
+# differences over time
+
+# Display the plot
+kenya_sweden_ASFR
 ```
-We could see that Sweden has a higher ASFR among youth than Kenya in both two periods.
+
+Now we could see the differences between Kenya and Sweden's data on ASFR. Kenya has a higher ASFR than Sweden from age 10 to 54 in both periods.
 
 ## Question 3
 
@@ -232,7 +266,7 @@ Using the ASFR, we can define the TFR as the average number of
 
 ### Answer 3
 
-The study creates function to compute the total fertility rate (TFR) based on the provided population data.
+We create function to compute the total fertility rate (TFR) based on the provided population data.
 
 ```{r}
 # Function to compute the TRF
@@ -245,7 +279,7 @@ compute_tfr <- function(pop_data) {
 }
 ```
 
-Next, the study computes the TFR for three different datasets, and each dataset is passed to the `compute_tfr` function to obtain the respective TFR values.
+Next, we compute the TFR for three different datasets, and each dataset is passed to the `compute_tfr` function to obtain the respective TFR values.
 
 ```{r}
 # Compute the TFR for each data set
@@ -255,23 +289,20 @@ Next, the study computes the TFR for three different datasets, and each dataset 
 (sweden_tfr <- compute_tfr(sweden_data))
 ```
 
-Now, the study calculates the totals of women and births in the world by period. This will help to understand how the demographics have changed over time.
-
 ```{r}
 # Compute totals of women and births in the world by period
-(
-  world_data %>%
-    group_by(period) %>%
-    summarise(
-      total_women = sum(py.women),
-      total_births = sum(births)
-    ) ->
-  totals_world
+(totals_world <- world_data %>%
+  group_by(period) %>%
+  summarise(
+    total_women = sum(py.women),
+    total_births = sum(births)
+  )
 )
 
 # Compare how much these totals have changed
 (changes_totals <- totals_world[2, -1] / totals_world[1, -1])
 ```
+
 The results show that the total number of women during 2005-2010 is 2.525 times greater than that during 1950-1955, and total number of births during 2005-2010 is 1.380 times greater than that during 1950-1955.
 
 ## Question 4
@@ -338,7 +369,7 @@ compute_asdr <- function(pop_data) {
 }
 ```
 
-Next, the study uses the function `compute_asdr` to calculate ASDR.
+Next, we use the function `compute_asdr` to calculate ASDR.
 
 ```{r}
 # Compute ASDR for each data set
@@ -392,7 +423,7 @@ kenya_data <- compute_pop_prop(kenya_data)
 sweden_data <- compute_pop_prop(sweden_data)
 ```
 
-Finally, the study calculates Kenya's CDR using Sweden's population distribution. This involves adjusting Kenya's ASDR by the population proportions from Sweden and summarizing the results by period.
+Finally, we calculate Kenya's CDR using Sweden's population distribution. This involves adjusting Kenya's ASDR by the population proportions from Sweden and summarizing the results by period.
 
 ```{r}
 # Compute Kenya's CDR using Sweden's population distribution
